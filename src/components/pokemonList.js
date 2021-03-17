@@ -1,8 +1,9 @@
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import { useSelector } from 'react-redux';
 import Paper from '@material-ui/core/Paper';
-import { Typography, Box, Grid, Button } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 import TablePagination from '@material-ui/core/TablePagination';
+import { Typography, Box, Grid, Button } from '@material-ui/core';
 import PokemonDetail from './pokemonDetail';
 
 
@@ -59,14 +60,16 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-export default function PokemonList(props) {
+export default function PokemonCatch(props) {
   const classes = useStyles();
+  const state = useSelector(state => state);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(12);
   const [open, setOpen] = React.useState({
     state: false,
     data: {}
   });
+  console.log(state.myPoke)
 
   const handleOpen = (param) => {
     setOpen({ state: true, data: param });
@@ -75,7 +78,6 @@ export default function PokemonList(props) {
   const handleClose = () => {
     setOpen({ state: false, data: {} });
   };
-
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -97,7 +99,7 @@ export default function PokemonList(props) {
                   <Grid container>
                     <Grid item xs={12} md={12} className={classes.center}>
                       <Box onClick={() => handleOpen(row.data)} borderRadius={16} className={classes.boxImage}>
-                        <img src={row.data.sprites.front_default} width='70%' />
+                        <img src={row.data.sprites.front_default} alt={row.data.name} width='70%' />
                       </Box>
                     </Grid>
                     <Grid item xs={12} md={12} className={classes.center}>
@@ -129,7 +131,7 @@ export default function PokemonList(props) {
         onChangePage={handleChangePage}
         onChangeRowsPerPage={handleChangeRowsPerPage}
       />
-      <PokemonDetail open={open} handleClose={() => handleClose()} />
+      <PokemonDetail open={open} handleClose={() => handleClose()}/>
     </Paper>
   );
 }

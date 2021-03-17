@@ -5,22 +5,27 @@ import pokemon from '../assets/pokemon.png';
 import pokeball from '../assets/pokeball.png';
 import SearchIcon from '@material-ui/icons/Search';
 import PokemonList from '../components/pokemonList';
+import PokemonCatch from '../components/pokemonCatch';
 import { makeStyles } from '@material-ui/core/styles';
-import { Typography, Box, Grid, Select, FormControl, MenuItem, InputLabel, TextField } from '@material-ui/core';
+import { Typography, Box, Grid, TextField } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
   container: {
     width: '100%',
     height: '100%',
+    minHeight: '100vh',
     textAlign: 'center',
-    // backgroundImage: `url(${background})`,
-    backgroundColor: '#156710',
+    backgroundImage: `url(${background})`,
+    // backgroundColor: '#156710',
+    backgroundRepeat: "no-repeat",
+    backgroundPosition: 'center',
     backgroundSize: "cover",
   },
   box: {
     borderRadius: '0 0 25px 25px',
     textAlign: 'center',
     width: '100%',
+    height: 'auto',
     padding: '60px 0',
     marginTop: '5px',
     backgroundColor: '#FFFFFF',
@@ -56,20 +61,53 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.up('lg')]: {
       padding: '0 80px 80px 80px',
     },
+  },
+  waitPict: {
+    [theme.breakpoints.down('md')]: {
+      width: '70%',
+    },
+    [theme.breakpoints.up('md')]: {
+      width: '30%',
+    },
+  },
+  textButton: {
+    padding: '0.3vw 1vw',
+    borderColor: '#c90000',
+    boxShadow: 'none',
+    '&:hover': {
+      color: '#ffffff',
+      backgroundColor: '#c90000',
+      borderColor: '#c90000',
+      boxShadow: 'none',
+    },
+    cursor: 'pointer',
+  },
+  cancelButton: {
+    padding: '0.3vw 1vw',
+    borderColor: '#c90000',
+    boxShadow: 'none',
+    '&:hover': {
+      color: '#c90000',
+      backgroundColor: '#000000',
+      borderColor: '#c90000',
+      boxShadow: 'none',
+    },
+    cursor: 'pointer',
   }
 }));
 
 const Mainpage = () => {
   const classes = useStyles();
-  const [details, setDetails] = useState([])
-  const [filteredDetails, setFilteredDetails] = useState([])
+  const [display, setDisplay] = useState(false);
+  const [details, setDetails] = useState([]);
+  const [filteredDetails, setFilteredDetails] = useState([]);
   const [state, setState] = React.useState({
     filter: '',
     search: ''
   });
 
   useEffect(() => {
-    axios.get(`https://pokeapi.co/api/v2/pokemon?limit=400`)
+    axios.get(`https://pokeapi.co/api/v2/pokemon?limit=1000`)
       .then(res => {
         const details = res.data.results
         const urlDetails = Array.from(details, x => x.url)
@@ -90,138 +128,80 @@ const Mainpage = () => {
     handleFilter(event.target.value)
   };
 
+  const handleDisplay = () => {
+    setDisplay(!display);
+  };
+
   const handleFilter = (param) => {
-    var filteredData = details.filter(function (pokemon) {
-      if (param === "fire") {
-        setState(prev => ({ ...prev, search: '' }))
-        return pokemon.data.types[0].type.name === "fire";
-      }
-      else if (param === "water") {
-        setState(prev => ({ ...prev, search: '' }))
-        return pokemon.data.types[0].type.name === "water";
-      }
-      else if (param === "grass") {
-        setState(prev => ({ ...prev, search: '' }))
-        return pokemon.data.types[0].type.name === "grass";
-      }
-      else if (param === "rock") {
-        setState(prev => ({ ...prev, search: '' }))
-        return pokemon.data.types[0].type.name === "rock";
-      }
-      else if (param === "fighting") {
-        setState(prev => ({ ...prev, search: '' }))
-        return pokemon.data.types[0].type.name === "fighting";
-      }
-      else if (param === "poison") {
-        setState(prev => ({ ...prev, search: '' }))
-        return pokemon.data.types[0].type.name === "poison";
-      }
-      else if (param === "flying") {
-        setState(prev => ({ ...prev, search: '' }))
-        return pokemon.data.types[0].type.name === "flying";
-      }
-      else if (param === "bug") {
-        setState(prev => ({ ...prev, search: '' }))
-        return pokemon.data.types[0].type.name === "bug";
-      }
-      else if (param === "electric") {
-        setState(prev => ({ ...prev, search: '' }))
-        return pokemon.data.types[0].type.name === "electric";
-      }
-      else if (param === "ground") {
-        setState(prev => ({ ...prev, search: '' }))
-        return pokemon.data.types[0].type.name === "ground";
-      }
-      else if (param === "fairy") {
-        setState(prev => ({ ...prev, search: '' }))
-        return pokemon.data.types[0].type.name === "fairy";
-      }
-      else if (param === "psychic") {
-        setState(prev => ({ ...prev, search: '' }))
-        return pokemon.data.types[0].type.name === "psychic";
-      }
-      else if (param === "others") {
-        setState(prev => ({ ...prev, search: '' }))
-        return pokemon.data.types[0].type.name === "normal" || pokemon.data.types[0].type.name === "dark" || pokemon.data.types[0].type.name === "ghost" || pokemon.data.types[0].type.name === "steel" || pokemon.data.types[0].type.name === "ice" || pokemon.data.types[0].type.name === "dragon" || pokemon.data.types[0].type.name === "shadow" || pokemon.data.types[0].type.name === "unknown";
-      }
-      else if (param === '') {
-        setState(prev => ({ ...prev, search: '' }))
-        return pokemon;
-      }
-      else {
-        return pokemon.data.name.includes(param)
-      }
-    });
+    var text = param.toLowerCase()
+    var filteredData = details.filter(function (pokemon) { return pokemon.data.name.includes(text) });
     setFilteredDetails(filteredData)
   }
-
+  
   return (
     <Fragment>
       <Box className={classes.container}>
         <div>
           <img src={pokeball} className="App-logo" alt="logo" style={{ paddingTop: '50px' }} />
-          <Typography variant="h3" style={{ fontWeight: 'bolder', marginBottom: '0.5em' }}>
-            Pokédex
+          <Typography variant="h4" style={{ marginBottom: '0.5em' }}>
+            Pokéfinder
           </Typography>
           <Grid container className={classes.boxPadding}>
             <Grid item xs={12} md={12}>
               <Box className={classes.filter}>
-                <Grid container>
-                  <Grid item xs={6} md={6} className={classes.left}>
-                    <div className={classes.margin}>
-                      <Grid container spacing={1} alignItems="flex-end">
-                        <Grid item>
-                          <SearchIcon />
-                        </Grid>
-                        <Grid item>
-                          <TextField
-                            id="input-with-icon-grid"
-                            label="Search by name..."
-                            inputProps={{ 'aria-label': 'search' }}
-                            value={state.search}
-                            onChange={handleChange('search')}
-                          />
+                { 
+                  display ?
+                    <div>
+                      <Grid container>
+                        <Grid item xs={12} md={12} className={classes.left}>
+                          <Box border={1} borderRadius={25} className={classes.textButton} onClick={() => handleDisplay()}>
+                            <Typography variant="h6" style={{ fontWeight: 'bolder' }}>Back</Typography>
+                          </Box>
                         </Grid>
                       </Grid>
                     </div>
-                  </Grid>
-                  <Grid item xs={6} md={6} className={classes.right}>
-                    <Typography variant='body1' style={{ margin: '5px' }}>Filter by type: </Typography>
-                    <FormControl variant="outlined" className={classes.formControl}>
-                      <InputLabel id="demo-simple-select-outlined-label">All Type</InputLabel>
-                      <Select
-                        labelId="demo-simple-select-outlined-label"
-                        id="demo-simple-select-outlined"
-                        value={state.filter}
-                        onChange={handleChange('filter')}
-                      >
-                        <MenuItem value="">All Type</MenuItem>
-                        <MenuItem value="fire">Fire</MenuItem>
-                        <MenuItem value="water">Water</MenuItem>
-                        <MenuItem value="grass">Grass</MenuItem>
-                        <MenuItem value="rock">Rock</MenuItem>
-                        <MenuItem value="fighting">Fighting</MenuItem>
-                        <MenuItem value="poison">Poison</MenuItem>
-                        <MenuItem value="flying">Flying</MenuItem>
-                        <MenuItem value="bug">Bug</MenuItem>
-                        <MenuItem value="electric">Electric</MenuItem>
-                        <MenuItem value="ground">Ground</MenuItem>
-                        <MenuItem value="fairy">Fairy</MenuItem>
-                        <MenuItem value="psychic">Psychic</MenuItem>
-                        <MenuItem value="others">Others</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Grid>
-                </Grid>
+                    :
+                    <div>
+                      <Grid container>
+                        <Grid item xs={8} md={6} className={classes.left}>
+                          <div className={classes.margin}>
+                            <Grid container spacing={1} alignItems="flex-end">
+                              <Grid item>
+                                <SearchIcon />
+                              </Grid>
+                              <Grid item>
+                                <TextField
+                                  id="input-with-icon-grid"
+                                  label="Search by name..."
+                                  inputProps={{ 'aria-label': 'search' }}
+                                  value={state.search}
+                                  onChange={handleChange('search')}
+                                />
+                              </Grid>
+                            </Grid>
+                          </div>
+                        </Grid>
+                        <Grid item xs={4} md={6} className={classes.right}>
+                          <Box border={1} borderRadius={25} className={classes.textButton} onClick={() => handleDisplay()}>
+                            <Typography variant="h6" style={{ fontWeight: 'bolder' }}>My Pokemon</Typography>
+                          </Box>
+                          {/* <Button variant='body1' onClick={() => handleOpen()} style={{ borderRadius: 16 }}>My Pokemon</Button> */}
+                      </Grid>
+                    </Grid>
+                  </div>
+                }
               </Box>
             </Grid>
             <Grid item xs={12} md={12}>
               <Grid container>
                 {
+                  display ?
+                  <PokemonCatch/>
+                  :
                   details.length === 0 ?
                     <Box className={classes.box}>
                       <Grid item xs={12} md={12}>
-                        <img src={pokemon} width='70%' height='40%' />
+                        <img src={pokemon} alt="wait" width='60%' height='40%' className={classes.waitPict}/>
                         <Typography variant='h6'>Wait a minute...</Typography>
                       </Grid>
                     </Box>

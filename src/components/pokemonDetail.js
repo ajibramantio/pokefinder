@@ -13,19 +13,68 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'center',
   },
   paper: {
-    width: '30%',
     textAlign: 'center',
-    backgroundColor: '#156710',
-    border: '1px solid #5ccf64',
-    borderRadius: 8,
+    backgroundColor: 'white',
+    border: '1px solid #4f9d4d',
+    borderRadius: 16,
     boxShadow: theme.shadows[5],
+    [theme.breakpoints.down('sm')]: {
+      width: '50%',
+      padding: theme.spacing(2, 4, 3),
+      fontSize: '5vw'
+    },
+    [theme.breakpoints.up('sm')]: {
+      width: '30%',
+      padding: theme.spacing(2, 4, 3),
+      fontSize: '2.5vw'
+    },
+    [theme.breakpoints.up('md')]: {
+    width: '20%',
     padding: theme.spacing(2, 4, 3),
+    fontSize: '1.5vw'
+    },
+    [theme.breakpoints.up('lg')]: {
+      width: '20%',
+      padding: theme.spacing(2, 4, 3),
+      fontSize: '1vw'
+    }
   },
+  button: {
+    borderRadius: 16,
+    color: 'black',
+    margin: '1.5em 0.5em 0 0.5em',
+    fontWeight: 'bolder',
+    [theme.breakpoints.down('md')]: {
+      fontSize: '0.7rem'
+    },
+    [theme.breakpoints.up('md')]: {
+      fontSize: '0.8rem'
+    },
+  }
 }));
 
 export default function PokeModal(props) {
   const classes = useStyles();
   const dataLength = Object.keys(props.open.data).length
+
+  const randomizer = () => {
+    var min = 1;
+    var max = 3;
+    var rand = Math.floor(min + (Math.random() * (max - min)));
+    return rand;
+  }
+
+  const handleCatch = (param) => {
+    var num = randomizer();
+    console.log(num)
+    if (num === 1) {
+      console.log("Gotcha!, Pokemon was caught!")
+      console.log(param)
+      props.handleClose()
+    } else {
+      console.log("Oh no, he get away!")
+    }
+  };
 
   return (
     <div>
@@ -43,7 +92,7 @@ export default function PokeModal(props) {
       >
         <Fade in={props.open.state}>
           <div className={classes.paper}>
-            <img src={dataLength === 0 ? null : props.open.data.sprites.front_default} alt="poke-img"></img>
+            <img src={dataLength === 0 ? null : props.open.data.sprites.front_default} style={{ width: "45%" }} alt="poke-img"></img>
             <h2 data-testid="pokeName" id="transition-modal-title" style={{ textTransform: 'capitalize' }}>{dataLength === 0 ? null : props.open.data.name}</h2>
             <div style={{ textAlign: 'left' }}>
               <p style={{ margin: "0" }} data-testid="height"><span style={{ fontWeight: 'bold' }}>height</span>: {dataLength === 0 ? null : props.open.data.height} </p>
@@ -65,7 +114,12 @@ export default function PokeModal(props) {
                 })
               }
             </div>
-            <Button onClick={props.handleClose}>Done</Button>
+            <Button onClick={props.handleClose} variant="contained" className={classes.button} style={{ backgroundColor: "#F4483F" }} >
+              Close
+            </Button>
+            <Button onClick={() => handleCatch(props.open.data)} variant="contained" className={classes.button} style={{ backgroundColor: "#1e5c1d" }} >
+              Try Catch!
+            </Button>
           </div>
         </Fade>
       </Modal>

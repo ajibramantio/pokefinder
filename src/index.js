@@ -1,17 +1,18 @@
-
-import React from 'react';
+import React from 'react';  
 import './index.css';
 import App from './App';
+import store from './store';
 import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
 import { HashRouter } from 'react-router-dom';
 import reportWebVitals from './reportWebVitals';
 
 ReactDOM.render(
-  <React.StrictMode>
+  <Provider store={store}>
     <HashRouter>
       <App />
     </HashRouter>
-  </React.StrictMode>,
+  </Provider>,
   document.getElementById('root')
 );
 
