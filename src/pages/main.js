@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import axios from 'axios';
-import background from '../assets/duo.jpg';
+import background from '../assets/grass.jpg';
 import pokemon from '../assets/pokemon.png';
 import pokeball from '../assets/pokeball.png';
 import SearchIcon from '@material-ui/icons/Search';
@@ -121,10 +121,7 @@ const Mainpage = () => {
   })
 
   const handleChange = name => event => {
-    setState({
-      ...state,
-      [name]: event.target.value,
-    });
+    setState({ ...state, [name]: event.target.value });
     handleFilter(event.target.value)
   };
 

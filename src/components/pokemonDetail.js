@@ -70,9 +70,10 @@ export default function PokeModal(props) {
     if (num === 1) {
       console.log("Gotcha!, Pokemon was caught!")
       console.log(param)
-      props.handleClose()
+      props.handleClose(1, param)
     } else {
       console.log("Oh no, he get away!")
+      props.handleClose(2, param)
     }
   };
 
