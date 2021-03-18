@@ -107,7 +107,7 @@ const Mainpage = () => {
   });
 
   useEffect(() => {
-    axios.get(`https://pokeapi.co/api/v2/pokemon?limit=1000`)
+    axios.get(`https://pokeapi.co/api/v2/pokemon?limit=100`)
       .then(res => {
         const details = res.data.results
         const urlDetails = Array.from(details, x => x.url)
