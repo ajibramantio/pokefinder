@@ -5,7 +5,8 @@ import buddy from '../assets/buddy.png';
 import { myPoke } from '../redux/actions/DataAction';
 import { makeStyles } from '@material-ui/core/styles';
 import TablePagination from '@material-ui/core/TablePagination';
-import { Typography, Box, Grid, Button, Snackbar } from '@material-ui/core';
+import { Typography, Box, Grid, Button } from '@material-ui/core';
+import PokemonInfo from './pokemonInfo';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -42,7 +43,7 @@ const useStyles = makeStyles((theme) => ({
       width: '70%',
     },
     [theme.breakpoints.up('md')]: {
-      width: '30%',
+      width: '25%',
     },
   },
   box: {
@@ -99,20 +100,13 @@ export default function PokeCatch() {
   const state = useSelector(state => state);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(12);
-  const [bar, setBar] = React.useState({
-    open: false,
-    vertical: 'top',
-    horizontal: 'center',
+  const [open, setOpen] = React.useState({
+    state: false,
+    data: {}
   });
 
-  const { vertical, horizontal, open } = bar;
-
-  const handleOpen = (newState) => () => {
-    setBar({ open: true, ...newState });
-  };
-
   const handleClose = () => {
-    setBar({ ...bar, open: false });
+    setOpen({ state: false, data: {} });
   };
 
   const handleChangePage = (event, newPage) => {
@@ -125,16 +119,12 @@ export default function PokeCatch() {
   };
 
   const handleRelease = (param) => {
-    // var name = state.myPoke.pokemon[param].name
-    // var initial = state.myPoke.names[param].name
     var newPokemon = state.myPoke.pokemon;
     var newNames = state.myPoke.names;
     newPokemon.splice(param, 1);
     newNames.splice(param, 1);
-    console.log(newPokemon, newNames);
     dispatch(myPoke(newPokemon, newNames));
-    handleOpen({ vertical: 'top', horizontal: 'center' })
-    // console.log("Your " + initial + "(" + name + ")" +" were released! Bye-bye!");
+    setOpen({ state: true, data: { id: 1, initial: state.myPoke.names[param].name, name: state.myPoke.pokemon[param].pokemon } });
   };
 
   return (
@@ -157,7 +147,7 @@ export default function PokeCatch() {
                   <Grid container>
                     <Grid item xs={12} md={12} className={classes.center}>
                       <Box borderRadius={16} className={classes.boxImage}>
-                        {/* <img src={row.sprites.front_default} alt={row.name} width='70%' /> */}
+                        <img src={row.sprites.front_default} alt={row.name} width='70%' />
                       </Box>
                     </Grid>
                     <Grid item xs={12} md={12} className={classes.center}>
@@ -165,7 +155,7 @@ export default function PokeCatch() {
                     </Grid>
                     <Grid item xs={12} md={12} className={classes.center}>
                       <Box borderRadius="borderRadius" className={classes.boxType}>
-                        {/* <Typography variant='body1' style={{ fontSize: '20px', textTransform: 'capitalize' }}>{row.types[0].type.name}</Typography> */}
+                        <Typography variant='body1' style={{ fontSize: '20px', textTransform: 'capitalize' }}>{row.types[0].type.name}</Typography>
                       </Box>
                     </Grid>
                     <Grid item xs={12} md={12} className={classes.center}>
@@ -189,14 +179,7 @@ export default function PokeCatch() {
         onChangePage={handleChangePage}
         onChangeRowsPerPage={handleChangeRowsPerPage}
       />
-      <Snackbar
-        anchorOrigin={{ vertical, horizontal }}
-        open={open}
-        onClose={handleClose}
-        autoHideDuration={6000}
-        message="Your Pokemon were released! Bye-bye!"
-        key={vertical + horizontal}
-      />
+      <PokemonInfo open={open} handleClose={() => handleClose()} />
     </Paper>
   );
 }

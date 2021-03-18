@@ -1,9 +1,11 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import Paper from '@material-ui/core/Paper';
+import { myPoke } from '../redux/actions/DataAction';
 import { makeStyles } from '@material-ui/core/styles';
 import TablePagination from '@material-ui/core/TablePagination';
 import { Typography, Box, Grid, Button } from '@material-ui/core';
+import PokemonInfo from './pokemonInfo';
 import PokemonDetail from './pokemonDetail';
 
 
@@ -62,6 +64,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function PokemonCatch(props) {
   const classes = useStyles();
+  const dispatch = useDispatch();
   const state = useSelector(state => state);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(12);
@@ -69,14 +72,36 @@ export default function PokemonCatch(props) {
     state: false,
     data: {}
   });
-  console.log(state.myPoke)
+  const [nickname, setNickname] = React.useState({
+    state: false,
+    data: {}
+  });
+  const [newData, setNewData] = React.useState({
+    pokemon: {},
+    name: {}
+  });
 
   const handleOpen = (param) => {
     setOpen({ state: true, data: param });
   };
 
-  const handleClose = () => {
-    setOpen({ state: false, data: {} });
+  const handleClose = (id, param) => {
+    if (id === 1) {
+      setNewData(prev => ({ ...prev, pokemon: param }));
+      setOpen({ state: false, data: {} });
+      setNickname({ state: true, data: { id: 2, initial: '', name: '' } });
+    } else if (id === 2) {
+      var listPokemon = state.myPoke.pokemon;
+      var listName = state.myPoke.names;
+      listPokemon.concat(newData.pokemon);
+      listName.concat(param);
+      console.log(param);
+      setNickname({ state: false, data: {} });
+      dispatch(myPoke(listPokemon, listName));
+      setNickname({ state: true, data: { id: 0, initial: '', name: '' } });
+    } else {
+      setOpen({ state: false, data: {} });
+    }
   };
 
   const handleChangePage = (event, newPage) => {
@@ -132,6 +157,7 @@ export default function PokemonCatch(props) {
         onChangeRowsPerPage={handleChangeRowsPerPage}
       />
       <PokemonDetail open={open} handleClose={() => handleClose()}/>
+      <PokemonInfo open={nickname} handleClose={() => handleClose()}/>
     </Paper>
   );
 }
