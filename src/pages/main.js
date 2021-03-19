@@ -1,13 +1,16 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import axios from 'axios';
-import background from '../assets/grass.jpg';
 import pokemon from '../assets/pokemon.png';
+import background from '../assets/grass.jpg';
 import pokeball from '../assets/pokeball.png';
+import CloseIcon from '@material-ui/icons/Close';
 import SearchIcon from '@material-ui/icons/Search';
 import PokemonList from '../components/pokemonList';
+import { myPoke } from '../redux/actions/DataAction';
 import PokemonCatch from '../components/pokemonCatch';
 import { makeStyles } from '@material-ui/core/styles';
-import { Typography, Box, Grid, TextField } from '@material-ui/core';
+import { useSelector, useDispatch } from 'react-redux';
+import { Typography, Box, Grid, TextField, Snackbar, IconButton } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -16,7 +19,6 @@ const useStyles = makeStyles((theme) => ({
     minHeight: '100vh',
     textAlign: 'center',
     backgroundImage: `url(${background})`,
-    // backgroundColor: '#156710',
     backgroundRepeat: "no-repeat",
     backgroundPosition: 'center',
     backgroundSize: "cover",
@@ -98,10 +100,14 @@ const useStyles = makeStyles((theme) => ({
 
 const Mainpage = () => {
   const classes = useStyles();
+  const dispatch = useDispatch();
+  const state = useSelector(state => state);
+  const [success, setSuccess] = React.useState(false);
+  const [open, setOpen] = React.useState(false);
   const [display, setDisplay] = useState(false);
   const [details, setDetails] = useState([]);
   const [filteredDetails, setFilteredDetails] = useState([]);
-  const [state, setState] = React.useState({
+  const [values, setValues] = React.useState({
     filter: '',
     search: ''
   });
@@ -118,11 +124,39 @@ const Mainpage = () => {
           }
         })
       })
-  })
+  });
+
+  const handleOpen = () => {
+    setOpen(true);
+  };
+
+  const handleSuccess = () => {
+    setSuccess(true);
+  };
+
+  const handleShut = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSuccess(false);
+  };
+
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpen(false);
+  };
 
   const handleChange = name => event => {
-    setState({ ...state, [name]: event.target.value });
+    setValues({ ...values, [name]: event.target.value });
     handleFilter(event.target.value)
+  };
+
+  const setData = (poke, name) => {
+    dispatch(myPoke(poke, name));
+    localStorage.setItem('pokemon', poke);
+    localStorage.setItem('names', name);
   };
 
   const handleDisplay = () => {
@@ -134,7 +168,7 @@ const Mainpage = () => {
     var filteredData = details.filter(function (pokemon) { return pokemon.data.name.includes(text) });
     setFilteredDetails(filteredData)
   }
-  
+
   return (
     <Fragment>
       <Box className={classes.container}>
@@ -146,7 +180,7 @@ const Mainpage = () => {
           <Grid container className={classes.boxPadding}>
             <Grid item xs={12} md={12}>
               <Box className={classes.filter}>
-                { 
+                {
                   display ?
                     <div>
                       <Grid container>
@@ -171,7 +205,7 @@ const Mainpage = () => {
                                   id="input-with-icon-grid"
                                   label="Search by name..."
                                   inputProps={{ 'aria-label': 'search' }}
-                                  value={state.search}
+                                  value={values.search}
                                   onChange={handleChange('search')}
                                 />
                               </Grid>
@@ -182,10 +216,9 @@ const Mainpage = () => {
                           <Box border={1} borderRadius={25} className={classes.textButton} onClick={() => handleDisplay()}>
                             <Typography variant="h6" style={{ fontWeight: 'bolder' }}>My Pokemon</Typography>
                           </Box>
-                          {/* <Button variant='body1' onClick={() => handleOpen()} style={{ borderRadius: 16 }}>My Pokemon</Button> */}
+                        </Grid>
                       </Grid>
-                    </Grid>
-                  </div>
+                    </div>
                 }
               </Box>
             </Grid>
@@ -193,23 +226,57 @@ const Mainpage = () => {
               <Grid container>
                 {
                   display ?
-                  <PokemonCatch/>
-                  :
-                  details.length === 0 ?
-                    <Box className={classes.box}>
-                      <Grid item xs={12} md={12}>
-                        <img src={pokemon} alt="wait" width='60%' height='40%' className={classes.waitPict}/>
-                        <Typography variant='h6'>Wait a minute...</Typography>
-                      </Grid>
-                    </Box>
+                    <PokemonCatch setData={() => setData()} pokemon={state.myPoke.pokemon} names={state.myPoke.names} />
                     :
-                    <PokemonList data={filteredDetails} />
-                }
+                    details.length === 0 ?
+                      <Box className={classes.box}>
+                        <Grid item xs={12} md={12}>
+                          <img src={pokemon} alt="wait" width='60%' height='40%' className={classes.waitPict} />
+                          <Typography variant='h6'>Wait a minute...</Typography>
+                        </Grid>
+                      </Box>
+                      :
+                      <PokemonList data={filteredDetails} setData={() => setData()} pokemon={state.myPoke.pokemon} names={state.myPoke.names} handleOpen={() => handleOpen()} handleSuccess={() => handleSuccess()} />
+          }
               </Grid>
             </Grid>
           </Grid>
         </div>
       </Box>
+      <Snackbar
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'center',
+        }}
+        open={open}
+        autoHideDuration={6000}
+        onClose={handleClose}
+        message="Oh no, he get away!"
+        action={
+          <React.Fragment>
+            <IconButton size="small" aria-label="close" color="inherit" onClick={handleClose}>
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </React.Fragment>
+        }
+      />
+      <Snackbar
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'center',
+        }}
+        open={success}
+        autoHideDuration={6000}
+        onClose={handleClose}
+        message="Yeay, we've got him!"
+        action={
+          <React.Fragment>
+            <IconButton size="small" aria-label="close" color="inherit" onClick={handleShut}>
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </React.Fragment>
+        }
+      />
     </Fragment>
   )
 }

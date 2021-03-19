@@ -1,12 +1,9 @@
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import PokemonDetail from './pokemonDetail';
 import Paper from '@material-ui/core/Paper';
-import { myPoke } from '../redux/actions/DataAction';
 import { makeStyles } from '@material-ui/core/styles';
 import TablePagination from '@material-ui/core/TablePagination';
 import { Typography, Box, Grid, Button } from '@material-ui/core';
-import PokemonInfo from './pokemonInfo';
-import PokemonDetail from './pokemonDetail';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -62,46 +59,31 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-export default function PokemonCatch(props) {
+export default function PokemonList(props) {
   const classes = useStyles();
-  const dispatch = useDispatch();
-  const state = useSelector(state => state);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(12);
   const [open, setOpen] = React.useState({
     state: false,
     data: {}
   });
-  const [nickname, setNickname] = React.useState({
-    state: false,
-    data: {}
-  });
-  const [newData, setNewData] = React.useState({
-    pokemon: {},
-    name: {}
-  });
+
+  const setData = (poke, name) => {
+    props.setData(poke, name);
+  };
 
   const handleOpen = (param) => {
     setOpen({ state: true, data: param });
   };
 
-  const handleClose = (id, param) => {
-    if (id === 1) {
-      setNewData(prev => ({ ...prev, pokemon: param }));
-      setOpen({ state: false, data: {} });
-      setNickname({ state: true, data: { id: 2, initial: '', name: '' } });
-    } else if (id === 2) {
-      var listPokemon = state.myPoke.pokemon;
-      var listName = state.myPoke.names;
-      listPokemon.concat(newData.pokemon);
-      listName.concat(param);
-      console.log(param);
-      setNickname({ state: false, data: {} });
-      dispatch(myPoke(listPokemon, listName));
-      setNickname({ state: true, data: { id: 0, initial: '', name: '' } });
-    } else {
-      setOpen({ state: false, data: {} });
-    }
+  const handleClose = () => {
+    setOpen({ state: false, data: {} });
+    props.handleSuccess();
+  };
+
+  const handleCloseRun = () => {
+    setOpen({ state: false, data: {} });
+    props.handleOpen();
   };
 
   const handleChangePage = (event, newPage) => {
@@ -156,8 +138,7 @@ export default function PokemonCatch(props) {
         onChangePage={handleChangePage}
         onChangeRowsPerPage={handleChangeRowsPerPage}
       />
-      <PokemonDetail open={open} handleClose={() => handleClose()}/>
-      <PokemonInfo open={nickname} handleClose={() => handleClose()}/>
+      <PokemonDetail open={open} handleClose={() => handleClose()} handleCloseRun={() => handleCloseRun()} setData={() => setData()} pokemon={props.pokemon} names={props.names}/>
     </Paper>
   );
 }

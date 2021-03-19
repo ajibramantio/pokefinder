@@ -1,9 +1,11 @@
-import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import React, { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import Fade from '@material-ui/core/Fade';
 import Modal from '@material-ui/core/Modal';
 import Backdrop from '@material-ui/core/Backdrop';
-import Fade from '@material-ui/core/Fade';
-import { Button } from '@material-ui/core';
+import { myPoke } from '../redux/actions/DataAction';
+import { makeStyles } from '@material-ui/core/styles';
+import { Button, Typography, TextField } from '@material-ui/core';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -50,12 +52,84 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.up('md')]: {
       fontSize: '0.8rem'
     },
+  },
+  word: {
+    width: '100%',
+    marginTop: '1vh',
+    fontWeight: 'bolder',
+    [theme.breakpoints.down('sm')]: {
+      fontSize: '5vw'
+    },
+    [theme.breakpoints.up('sm')]: {
+      fontSize: '2.5vw'
+    },
+    [theme.breakpoints.up('md')]: {
+      fontSize: '1.5vw'
+    },
+    [theme.breakpoints.up('lg')]: {
+      fontSize: '1vw'
+    }
+  },
+  buttonDetails: {
+    width: '50%',
+    marginTop: '1vh',
+    borderRadius: 16,
+    backgroundColor: "#156710",
+    color: 'black',
+    fontWeight: 'bolder',
+    fontSize: '0.6rem'
   }
 }));
 
-export default function PokeModal(props) {
+export default function PokemonDetail(props) {
   const classes = useStyles();
-  const dataLength = Object.keys(props.open.data).length
+  const dispatch = useDispatch();
+  const [show, setShow] = React.useState(false);
+  const [nameCheck, setNameCheck] = React.useState(true);
+  const dataLength = Object.keys(props.open.data).length;
+  const [value, setValue] = React.useState({
+    newName: '',
+    listPokemon: [],
+    listName: []
+  });
+
+  useEffect(() => {
+    if (props.pokemon === "" || props.pokemon.length === 0) {
+      setValue(prev => ({ ...prev, listPokemon: [], listName: [] }));
+    } else {
+      setValue(prev => ({ ...prev, listPokemon: props.pokemon, listName: props.names }));
+    }
+  }, []);
+
+  const handleChange = name => e => {
+    checkAvailable(e.target.value);
+    setValue(prev => ({ ...prev, [name]: e.target.value }));
+  };
+
+  const handleSave = () => {
+    setValue(prev => ({ ...prev, listPokemon: [ ...prev['listPokemon'].concat(props.open.data)], listName: [ ...prev['listName'].concat({ name: value.newName })] }));
+    dispatch(myPoke(value.listPokemon, value.listName));
+    setShow(false);
+    setValue(prev => ({ ...prev, newName: '' }));
+    props.handleClose();
+  };
+
+  const checkAvailable = (param) => {
+    const list = value.listName;
+    if (param === '') {
+      setNameCheck(true);
+    } else if (list.length === 0) {
+      setNameCheck(false);
+    } else {
+      for (const [index, value] of list.entries()) {
+        if (value.name.toLowerCase() === param.toLowerCase()) {
+          setNameCheck(true);
+        } else {
+          setNameCheck(false);
+        }
+      }
+    }
+  }
 
   const randomizer = () => {
     var min = 1;
@@ -66,14 +140,10 @@ export default function PokeModal(props) {
 
   const handleCatch = (param) => {
     var num = randomizer();
-    console.log(num)
     if (num === 1) {
-      console.log("Gotcha!, Pokemon was caught!")
-      console.log(param)
-      props.handleClose(1, param)
+      setShow(true);
     } else {
-      console.log("Oh no, he get away!")
-      props.handleClose(2, param)
+      props.handleCloseRun();
     }
   };
 
@@ -84,7 +154,6 @@ export default function PokeModal(props) {
         aria-describedby="transition-modal-description"
         className={classes.modal}
         open={props.open.state}
-        onClose={props.handleClose}
         closeAfterTransition
         BackdropComponent={Backdrop}
         BackdropProps={{
@@ -115,12 +184,31 @@ export default function PokeModal(props) {
                 })
               }
             </div>
-            <Button onClick={props.handleClose} variant="contained" className={classes.button} style={{ backgroundColor: "#F4483F" }} >
-              Close
-            </Button>
-            <Button onClick={() => handleCatch(props.open.data)} variant="contained" className={classes.button} style={{ backgroundColor: "#1e5c1d" }} >
-              Try Catch!
-            </Button>
+            { show ?
+              <div style={{ marginTop: '2vh' }}>
+                <Typography className={classes.word}>Gotcha!, Pokemon was caught!</Typography>
+                <TextField
+                  id="standard-basic"
+                  label="What would you call him?"
+                  style={{ width: '100%', marginTop: '1vh' }}
+                  variant="outlined"
+                  value={value.newName}
+                  onChange={handleChange('newName')}
+                />
+                <Button disabled={nameCheck} onClick={() => handleSave()} variant="contained" className={classes.buttonDetails}>
+                  Go
+                </Button>
+              </div>
+              :
+              <div>
+                <Button onClick={props.handleClose} variant="contained" className={classes.button} style={{ backgroundColor: "#F4483F" }} >
+                  Close
+                </Button>
+                <Button onClick={() => handleCatch(props.open.data)} variant="contained" className={classes.button} style={{ backgroundColor: "#1e5c1d" }} >
+                  Try Catch!
+                </Button>
+              </div>
+            }
           </div>
         </Fade>
       </Modal>

@@ -1,12 +1,10 @@
-import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import Paper from '@material-ui/core/Paper';
+import React, { useEffect } from 'react';
 import buddy from '../assets/buddy.png';
+import { useDispatch } from 'react-redux';
 import { myPoke } from '../redux/actions/DataAction';
 import { makeStyles } from '@material-ui/core/styles';
 import TablePagination from '@material-ui/core/TablePagination';
-import { Typography, Box, Grid, Button } from '@material-ui/core';
-import PokemonInfo from './pokemonInfo';
+import { Typography, Box, Grid, Button, Paper } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -62,11 +60,6 @@ const useStyles = makeStyles((theme) => ({
     color: 'white',
     boxShadow: theme.shadows[5],
   },
-  center: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   pokeCard: {
     display: 'flex',
     alignItems: 'center',
@@ -94,15 +87,26 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-export default function PokeCatch() {
+export default function PokemonCatch(props) {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const state = useSelector(state => state);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(12);
+  const [value, setValue] = React.useState({
+    pokemon: [],
+    names: []
+  });
   const [open, setOpen] = React.useState({
     state: false,
     data: {}
+  });
+
+  useEffect(() => {
+    if (props.pokemon === "" || props.pokemon.length === 0) {
+      setValue(prev => ({ ...prev, pokemon: [], names: [] }));
+    } else {
+      setValue(prev => ({ ...prev, pokemon: props.pokemon, names: props.names }));
+    }
   });
 
   const handleClose = () => {
@@ -119,67 +123,68 @@ export default function PokeCatch() {
   };
 
   const handleRelease = (param) => {
-    var newPokemon = state.myPoke.pokemon;
-    var newNames = state.myPoke.names;
+    const newPokemon = props.pokemon;
+    const newNames = props.names;
+    const poke = newPokemon[param].name;
+    const nama = newNames[param].name;
     newPokemon.splice(param, 1);
     newNames.splice(param, 1);
     dispatch(myPoke(newPokemon, newNames));
-    setOpen({ state: true, data: { id: 1, initial: state.myPoke.names[param].name, name: state.myPoke.pokemon[param].pokemon } });
+    setOpen({ state: true, data: { id: 1, initial: poke, name: nama } });
   };
 
   return (
     <Paper className={classes.root}>
       <Box className={classes.card}>
         {
-          state.myPoke.pokemon.length === 0 ?
-          <Box className={classes.box}>
-            <Grid item xs={12} md={12}>
-              <img src={buddy} alt="wait" width='60%' height='40%' className={classes.waitPict}/>
-              <Typography variant='h6'>Let's go catch some pokemon!</Typography>
-            </Grid>
-          </Box>
-          :
-          state.myPoke.pokemon.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, idx) => {
-          return (
-            <Grid key={row.id} item xs={12} md={3}>
-              <Box className={classes.pokeCard}>
-                <Box borderRadius="borderRadius" className={classes.pokeBox}>
-                  <Grid container>
-                    <Grid item xs={12} md={12} className={classes.center}>
-                      <Box borderRadius={16} className={classes.boxImage}>
-                        <img src={row.sprites.front_default} alt={row.name} width='70%' />
-                      </Box>
-                    </Grid>
-                    <Grid item xs={12} md={12} className={classes.center}>
-                      <Typography variant='body1' style={{ fontSize: '20px', textTransform: 'capitalize' }}>{state.myPoke.names[idx].name}</Typography>
-                    </Grid>
-                    <Grid item xs={12} md={12} className={classes.center}>
-                      <Box borderRadius="borderRadius" className={classes.boxType}>
-                        <Typography variant='body1' style={{ fontSize: '20px', textTransform: 'capitalize' }}>{row.types[0].type.name}</Typography>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={12} md={12} className={classes.center}>
-                      <Button onClick={() => handleRelease(idx)} variant="contained" className={classes.buttonDetails}>
-                        Release
+          value.pokemon.length === 0 ?
+            <Box className={classes.box}>
+              <Grid item xs={12} md={12}>
+                <img src={buddy} alt="wait" width='60%' height='40%' className={classes.waitPict} />
+                <Typography variant='h6'>Let's go catch some pokemon!</Typography>
+              </Grid>
+            </Box>
+            :
+            value.pokemon.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, idx) => {
+              return (
+                <Grid key={row.id} item xs={12} md={3}>
+                  <Box className={classes.pokeCard}>
+                    <Box borderRadius="borderRadius" className={classes.pokeBox}>
+                      <Grid container>
+                        <Grid item xs={12} md={12} className={classes.center}>
+                          <Box borderRadius={16} className={classes.boxImage}>
+                            <img src={row.sprites.front_default} alt={row.name} width='70%' />
+                          </Box>
+                        </Grid>
+                        <Grid item xs={12} md={12} className={classes.center}>
+                          <Typography variant='body1' style={{ fontSize: '20px', textTransform: 'capitalize' }}>{value.names[idx].name}</Typography>
+                        </Grid>
+                        <Grid item xs={12} md={12} className={classes.center}>
+                          <Box borderRadius="borderRadius" className={classes.boxType}>
+                            <Typography variant='body1' style={{ fontSize: '20px', textTransform: 'capitalize' }}>{row.types[0].type.name}</Typography>
+                          </Box>
+                        </Grid>
+                        <Grid item xs={12} md={12} className={classes.center}>
+                          <Button onClick={() => handleRelease(idx)} variant="contained" className={classes.buttonDetails}>
+                            Release
                       </Button>
-                    </Grid>
-                  </Grid>
-                </Box>
-              </Box>
-            </Grid>
-          )
-        })}
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  </Box>
+                </Grid>
+              )
+            })}
       </Box>
       <TablePagination
         rowsPerPageOptions={[12, 20, 60, 100]}
         component="div"
-        count={state.myPoke.pokemon.length}
+        count={props.pokemon.length}
         rowsPerPage={rowsPerPage}
         page={page}
         onChangePage={handleChangePage}
         onChangeRowsPerPage={handleChangeRowsPerPage}
       />
-      <PokemonInfo open={open} handleClose={() => handleClose()} />
     </Paper>
   );
 }
